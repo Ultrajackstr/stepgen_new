@@ -173,14 +173,14 @@ impl Stepgen {
 
     fn speedup(&mut self) {
         let denom = 4 * self.speed + 1;
-        self.delay -= (2 * self.delay + denom / 2) / denom;
+        self.delay -= (2 * self.delay + denom) / denom;
         self.speed += 1;
     }
 
     fn slowdown(&mut self) {
         self.speed -= 1;
         let denom = 4 * self.speed - 1;
-        self.delay += (2 * self.delay + denom / 2) / denom;
+        self.delay += (2 * self.delay + denom) / denom;
     }
 }
 
