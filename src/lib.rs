@@ -124,7 +124,7 @@ impl Stepgen {
         self.current_step += 1;
 
         if self.speed == 0 {
-            if target_delay > self.first_delay {
+            return if target_delay > self.first_delay {
                 // No acceleration is necessary -- just return the target delay
                 target_delay
             } else {
