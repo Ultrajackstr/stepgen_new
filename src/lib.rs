@@ -140,9 +140,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if self.acceleration_steps < ZERO_POINT_TWENTY_SIX { // Prevent underflow.
             self.acceleration_steps = ZERO_POINT_TWENTY_SIX
         }
-        self.acceleration_steps -= Fix::ONE;
         let denom = FOUR * self.acceleration_steps - Fix::ONE;
         self.current_delay += (TWO * self.current_delay) / denom;
+        self.acceleration_steps -= Fix::ONE;
     }
 }
 
