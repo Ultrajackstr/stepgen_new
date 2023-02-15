@@ -16,7 +16,6 @@ edition = "2021"
 fixed = "1.23.0"
 fixed-sqrt = "0.2.5"
 fixed-macro = "1.2.0"
-fugit = "0.3.6"
 
 [package.metadata.release]
 pre-release-hook = "./update-readme.sh"
