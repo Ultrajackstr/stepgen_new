@@ -10,10 +10,21 @@ readme = "README.md"
 exclude = [
     "docs/*"
 ]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-micromath = "2.0.0"
+fixed = "1.23.0"
+fixed-sqrt = "0.2.5"
+fixed-macro = "1.2.0"
+fugit = "0.3.6"
 
 [package.metadata.release]
 pre-release-hook = "./update-readme.sh"
+
+[profile.release]
+opt-level = 3
+lto = true
+
+# Optimize all dependencies even in debug builds:
+[profile.dev.package."*"]
+opt-level = 2
