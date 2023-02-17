@@ -67,11 +67,11 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Returns '0' if should stop. Otherwise, returns timer delay in 24.8 format
-    fn next_delay(&mut self) -> u32 {
+    pub fn next_delay(&mut self) -> Option<u32> {
         // We are at the stop point and speed is zero -- return "stopped" (delay of 0)
         if self.current_step >= self.target_step && self.acceleration_steps <= Fix::ONE {
             self.acceleration_steps = Fix::ZERO;
-            return 0;
+            return None;
         }
 
         // Stop slewing if target delay was changed
@@ -85,12 +85,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if self.acceleration_steps == Fix::ZERO {
             return if self.target_delay > self.first_delay {
                 // No acceleration is necessary -- just return the target delay
-                self.target_delay.to_num::<u32>()
+                Some(self.target_delay.to_num::<u32>())
             } else {
                 // First step: load first delay, count as one acceleration step
                 self.current_delay = self.first_delay;
                 self.acceleration_steps = Fix::ONE;
-                self.current_delay.to_num::<u32>()
+                Some(self.current_delay.to_num::<u32>())
             };
         }
 
@@ -126,7 +126,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
         // If slewing, return slew delay. delay should be close enough, but could
         // be different due to the accumulated rounding errors
-        if self.slewing_delay != Fix::ZERO { self.slewing_delay.to_num::<u32>() } else { self.current_delay.to_num::<u32>() }
+        if self.slewing_delay != Fix::ZERO { Some(self.slewing_delay.to_num::<u32>()) } else { Some(self.current_delay.to_num::<u32>()) }
     }
 
 
@@ -143,16 +143,5 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         let denom = FOUR * self.acceleration_steps - Fix::ONE;
         self.current_delay += (TWO * self.current_delay) / denom;
         self.acceleration_steps -= Fix::ONE;
-    }
-}
-
-impl<const TIMER_HZ_MICROS: u32> Iterator for Stepgen<TIMER_HZ_MICROS> {
-    type Item = u32;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match Stepgen::next_delay(self) {
-            0 => None,
-            v => Some(v)
-        }
     }
 }
