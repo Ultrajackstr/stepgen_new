@@ -17,9 +17,6 @@ fixed = "1.23.1"
 fixed-sqrt = "0.2.5"
 fixed-macro = "1.2.0"
 
-[features]
-x64 = []
-
 [package.metadata.release]
 pre-release-hook = "./update-readme.sh"
 
