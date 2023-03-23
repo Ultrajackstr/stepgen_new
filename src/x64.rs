@@ -71,12 +71,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if self.acceleration_steps == Fix::ZERO {
             return if self.target_delay > self.first_delay {
                 // No acceleration is necessary -- just return the target delay
-                Some(self.target_delay.ceil().to_num::<u32>())
+                Some(self.target_delay.to_num::<u32>())
             } else {
                 // First step: load first delay, count as one acceleration step
                 self.current_delay = self.first_delay;
                 self.acceleration_steps = Fix::ONE;
-                Some(self.current_delay.ceil().to_num::<u32>())
+                Some(self.current_delay.to_num::<u32>())
             };
         }
 
@@ -112,7 +112,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
         // If slewing, return slew delay. delay should be close enough, but could
         // be different due to the accumulated rounding errors
-        if self.slewing_delay != Fix::ZERO { Some(self.slewing_delay.ceil().to_num::<u32>()) } else { Some(self.current_delay.ceil().to_num::<u32>()) }
+        if self.slewing_delay != Fix::ZERO { Some(self.slewing_delay.to_num::<u32>()) } else { Some(self.current_delay.to_num::<u32>()) }
     }
 
 
