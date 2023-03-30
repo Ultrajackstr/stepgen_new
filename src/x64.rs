@@ -81,7 +81,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         }
 
         // Calculate the projected step we would stop at if we start decelerating right now
-        let estimated_stop_step = self.current_step + self.acceleration_steps.to_num::<Fix>();
+        let estimated_stop_step = self.current_step + self.acceleration_steps;
         if estimated_stop_step == self.target_step {
             // We would stop one step earlier than we want, so let's just
             // return the same delay as the current one and start deceleration
