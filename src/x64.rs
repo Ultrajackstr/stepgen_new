@@ -74,7 +74,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Returns 'None' if should stop. Otherwise, returns delay as u32.
-    pub fn next_delay(&mut self, current_ms: Option<u64>) -> Option<u32> {
+    pub fn next_delay(&mut self, current_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>) -> Option<u32> {
         if current_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
         }
@@ -85,13 +85,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Duration operating mode
-    fn next_delay_duration(&mut self, current_ms: u64) -> Option<u32> {
-        let millis_instant = TimerInstantU64::<TIMER_HZ_MILLIS>::from_ticks(current_ms);
+    fn next_delay_duration(&mut self, current_ms: TimerInstantU64<TIMER_HZ_MILLIS>) -> Option<u32> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
-            self.start_time_ms = Some(millis_instant);
+            self.start_time_ms = Some(current_ms);
         }
-        let current_duration = millis_instant - self.start_time_ms.unwrap();
+        let current_duration = current_ms - self.start_time_ms.unwrap();
         // We reached the target duration. Return None.
         if current_duration >= self.target_duration_ms {
             return None;
