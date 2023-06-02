@@ -58,14 +58,8 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if first_delay < target_delay {
             first_delay = target_delay;
         }
-        let target_step = match target_step {
-            Some(step) => Some(Fix::from_num(step)),
-            None => None,
-        };
-        let target_duration_ms = match target_duration_ms {
-            Some(duration) => Some(TimerDurationU32::<TIMER_HZ_MILLIS>::from_ticks(duration)),
-            None => None,
-        };
+        let target_step = target_step.map(Fix::from_num);
+        let target_duration_ms = target_duration_ms.map(TimerDurationU32::<TIMER_HZ_MILLIS>::from_ticks);
         Ok(Stepgen {
             operating_mode,
             current_step: Fix::ZERO,
