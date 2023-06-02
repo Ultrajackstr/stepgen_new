@@ -16,6 +16,7 @@ edition = "2021"
 fixed = "1.23.1"
 fixed-sqrt = "0.2.5"
 fixed-macro = "1.2.0"
+fugit = "0.3.6"
 
 [profile.release]
 opt-level = 3

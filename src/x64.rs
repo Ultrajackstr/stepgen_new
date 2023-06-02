@@ -3,22 +3,27 @@ use fixed::types::extra::U32;
 use fixed::types::U32F32;
 use fixed_macro::fixed;
 use fixed_sqrt::FixedSqrt;
+use fugit::{TimerDurationU32, TimerInstantU32};
 
-use crate::utils::enums::Error;
+use crate::utils::enums::{Error, OperatingMode};
 
 type Fix = FixedU64<U32>;
 
 const TWO: U32F32 = fixed!(2: U32F32);
 const FOUR: U32F32 = fixed!(4: U32F32);
 
+const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
+
 /// State of the stepgen.
 #[derive(Debug)]
 pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
+    // Operating mode
+    operating_mode: OperatingMode,
     current_step: Fix,
     // Amount of acceleration steps we've taken so far
     acceleration_steps: Fix,
     // How long did the acceleration take
-    acceleration_duration_ms: Fix,
+    acceleration_duration_ms: TimerInstantU32<TIMER_HZ_MILLIS>,
     // Previously calculated delay
     current_delay: Fix,
     // First step delay
@@ -26,23 +31,30 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     // Target step
     target_step: Option<Fix>,
     // Target duration
-    target_duration_ms: Option<Fix>,
+    target_duration_ms: Option<TimerDurationU32<TIMER_HZ_MILLIS>>,
     // Target speed delay
     target_delay: Fix,
+    // Start time
+    start_time_ms: Option<TimerInstantU32<TIMER_HZ_MILLIS>>,
 }
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
     pub fn new(target_rpm: u32, accel: u32, target_step: Option<u32>, target_duration_ms: Option<u32>) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
         if target_step.is_none() && target_duration_ms.is_none() {
-            return Err(Error::NoTargetAndNoDuration);
+            return Err(Error::NoStepTargetAndNoDuration);
+        } else if target_step.is_some() && target_duration_ms.is_some() {
+            return Err(Error::BothStepTargetAndDuration);
         }
+        let operating_mode = if target_step.is_some() {
+            OperatingMode::Step
+        } else {
+            OperatingMode::Duration
+        };
         // Convert target RPM to delay in timer ticks.
         let target_delay: Fix = Fix::from_num(60) / Fix::from_num(200) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
-        // Calculate first delay based on acceleration.
         let mut first_delay: Fix = (TWO / (Fix::from_num(accel) * Fix::from_num(3.35))).sqrt() // 3.35 correction factor
             * Fix::from_num(0.676) * Fix::from_num(TIMER_HZ_MICROS);
-        // If first_delay is smaller than target_delay, first_delay = target_delay
         if first_delay < target_delay {
             first_delay = target_delay;
         }
@@ -51,23 +63,79 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             None => None,
         };
         let target_duration_ms = match target_duration_ms {
-            Some(duration) => Some(Fix::from_num(duration)),
+            Some(duration) => Some(TimerDurationU32::<TIMER_HZ_MILLIS>::from_ticks(duration)),
             None => None,
         };
         Ok(Stepgen {
+            operating_mode,
             current_step: Fix::ZERO,
             acceleration_steps: Fix::from_num(0),
-            acceleration_duration_ms: Default::default(),
+            acceleration_duration_ms: TimerInstantU32::<TIMER_HZ_MILLIS>::from_ticks(0),
             current_delay: Fix::from_num(0),
             first_delay,
             target_step,
             target_duration_ms,
             target_delay,
+            start_time_ms: None,
         })
     }
 
     /// Returns 'None' if should stop. Otherwise, returns delay as u32.
-    pub fn next_delay(&mut self) -> Option<u32> {
+    pub fn next_delay(&mut self, current_ms: Option<u32>) -> Option<u32> {
+        if current_ms.is_none() && self.operating_mode == OperatingMode::Duration {
+            return None;
+        }
+        match self.operating_mode {
+            OperatingMode::Step => self.next_delay_step(),
+            OperatingMode::Duration => self.next_delay_duration(current_ms.unwrap()),
+        }
+    }
+
+    /// Duration operating mode
+    fn next_delay_duration(&mut self, current_ms: u32) -> Option<u32> {
+        let millis_instant = TimerInstantU32::<TIMER_HZ_MILLIS>::from_ticks(current_ms);
+        // If start time is None, we're at the start of the move. Set start time.
+        if self.start_time_ms.is_none() {
+            self.start_time_ms = Some(millis_instant.clone());
+        }
+        let current_duration = millis_instant - self.start_time_ms.unwrap();
+        // We reached the target duration. Return None.
+        if current_duration >= self.target_duration_ms.unwrap() {
+            return None;
+        }
+        // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
+        if self.current_step == Fix::ZERO {
+            self.acceleration_steps += Fix::ONE;
+            self.current_step += Fix::ONE;
+            self.current_delay = self.first_delay;
+            self.start_time_ms = current_ms.map(|ms| Fix::from_num(ms));
+            return Some(self.first_delay.to_num::<u32>());
+        }
+
+        // If current step is bigger or equal to the target step, we're at the end of the move. Return None.
+        if self.current_step >= self.target_step {
+            return None;
+        }
+
+        // If the current step is bigger are equal than the target step minus the acceleration steps, we need to slow down.
+        if self.current_step >= self.target_step - self.acceleration_steps {
+            self.slow_down();
+            return Some(self.current_delay.to_num::<u32>());
+        }
+
+        // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
+        // Else, we need to accelerate.
+        if self.current_delay == self.target_delay {
+            self.current_step += Fix::ONE;
+            Some(self.current_delay.to_num::<u32>())
+        } else {
+            self.speed_up();
+            Some(self.current_delay.to_num::<u32>())
+        }
+    }
+
+    /// Step operating mode
+    fn next_delay_step(&mut self) -> Option<u32> {
         // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
         if self.current_step == Fix::ZERO {
             self.acceleration_steps += Fix::ONE;
