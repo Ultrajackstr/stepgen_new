@@ -1,10 +1,10 @@
 [package]
-authors = ["Ivan Dubrov <dubrov.ivan@gmail.com>"]
+authors = ["Giacomo Gropplero <giacomo@gropplero.com>"]
 categories = ["embedded", "no-std"]
-description = "Stepper motor speed ramp generator"
-repository = "https://github.com/idubrov/stepgen"
-name = "stepgen"
-version = "0.1.3"
+description = "Stepper motor speed ramp generator with time constraint"
+repository = "https://github.com/Ultrajackstr/stepgen_new"
+name = "stepgen_new"
+version = "0.3.0"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 exclude = [
@@ -16,9 +16,6 @@ edition = "2021"
 fixed = "1.23.1"
 fixed-sqrt = "0.2.5"
 fixed-macro = "1.2.0"
-
-[package.metadata.release]
-pre-release-hook = "./update-readme.sh"
 
 [profile.release]
 opt-level = 3

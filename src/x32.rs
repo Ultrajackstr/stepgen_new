@@ -85,13 +85,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
         // Else, we need to accelerate.
-        return if self.current_delay == self.target_delay {
+        if self.current_delay == self.target_delay {
             self.current_step += Fix0::ONE;
             Some(self.current_delay.to_num::<u32>())
         } else {
             self.speed_up();
             Some(self.current_delay.to_num::<u32>())
-        };
+        }
     }
     /// Speed up function
     fn speed_up(&mut self) {
