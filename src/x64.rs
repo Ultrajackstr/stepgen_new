@@ -3,7 +3,7 @@ use fixed::types::extra::U32;
 use fixed::types::U32F32;
 use fixed_macro::fixed;
 use fixed_sqrt::FixedSqrt;
-use fugit::{TimerDurationU32, TimerInstantU32};
+use fugit::{TimerDurationU64, TimerInstantU64};
 
 use crate::utils::enums::{Error, OperatingMode};
 
@@ -23,7 +23,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     // Amount of acceleration steps we've taken so far
     acceleration_steps: Fix,
     // How long did the acceleration take
-    acceleration_duration_ms: Option<TimerDurationU32<TIMER_HZ_MILLIS>>,
+    acceleration_duration_ms: Option<TimerDurationU64<TIMER_HZ_MILLIS>>,
     // Previously calculated delay
     current_delay: Fix,
     // First step delay
@@ -31,11 +31,11 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     // Target step
     target_step: Option<Fix>,
     // Target duration
-    target_duration_ms: Option<TimerDurationU32<TIMER_HZ_MILLIS>>,
+    target_duration_ms: Option<TimerDurationU64<TIMER_HZ_MILLIS>>,
     // Target speed delay
     target_delay: Fix,
     // Start time
-    start_time_ms: Option<TimerInstantU32<TIMER_HZ_MILLIS>>,
+    start_time_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>,
 }
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
@@ -59,7 +59,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             first_delay = target_delay;
         }
         let target_step = target_step.map(Fix::from_num);
-        let target_duration_ms = target_duration_ms.map(TimerDurationU32::<TIMER_HZ_MILLIS>::from_ticks);
+        let target_duration_ms = target_duration_ms.map(|duration_ms| TimerDurationU64::<TIMER_HZ_MILLIS>::millis(duration_ms as u64));
         Ok(Stepgen {
             operating_mode,
             current_step: Fix::ZERO,
@@ -75,7 +75,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Returns 'None' if should stop. Otherwise, returns delay as u32.
-    pub fn next_delay(&mut self, current_ms: Option<u32>) -> Option<u32> {
+    pub fn next_delay(&mut self, current_ms: Option<u64>) -> Option<u32> {
         if current_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
         }
@@ -86,8 +86,8 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Duration operating mode
-    fn next_delay_duration(&mut self, current_ms: u32) -> Option<u32> {
-        let millis_instant = TimerInstantU32::<TIMER_HZ_MILLIS>::from_ticks(current_ms);
+    fn next_delay_duration(&mut self, current_ms: u64) -> Option<u32> {
+        let millis_instant = TimerInstantU64::<TIMER_HZ_MILLIS>::from_ticks(current_ms);
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
             self.start_time_ms = Some(millis_instant);
