@@ -23,7 +23,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     // Amount of acceleration steps we've taken so far
     acceleration_steps: Fix,
     // How long did the acceleration take
-    acceleration_duration_ms: TimerInstantU32<TIMER_HZ_MILLIS>,
+    acceleration_duration_ms: Option<TimerDurationU32<TIMER_HZ_MILLIS>>,
     // Previously calculated delay
     current_delay: Fix,
     // First step delay
@@ -70,7 +70,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             operating_mode,
             current_step: Fix::ZERO,
             acceleration_steps: Fix::from_num(0),
-            acceleration_duration_ms: TimerInstantU32::<TIMER_HZ_MILLIS>::from_ticks(0),
+            acceleration_duration_ms: None,
             current_delay: Fix::from_num(0),
             first_delay,
             target_step,
@@ -96,7 +96,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         let millis_instant = TimerInstantU32::<TIMER_HZ_MILLIS>::from_ticks(current_ms);
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
-            self.start_time_ms = Some(millis_instant.clone());
+            self.start_time_ms = Some(millis_instant);
         }
         let current_duration = millis_instant - self.start_time_ms.unwrap();
         // We reached the target duration. Return None.
@@ -108,24 +108,24 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             self.acceleration_steps += Fix::ONE;
             self.current_step += Fix::ONE;
             self.current_delay = self.first_delay;
-            self.start_time_ms = current_ms.map(|ms| Fix::from_num(ms));
             return Some(self.first_delay.to_num::<u32>());
         }
 
-        // If current step is bigger or equal to the target step, we're at the end of the move. Return None.
-        if self.current_step >= self.target_step {
-            return None;
-        }
-
-        // If the current step is bigger are equal than the target step minus the acceleration steps, we need to slow down.
-        if self.current_step >= self.target_step - self.acceleration_steps {
-            self.slow_down();
-            return Some(self.current_delay.to_num::<u32>());
+        // If the time remaining is less than the time it took to accelerate, slow down.
+        if let Some(acceleration_duration_ms) = &self.acceleration_duration_ms {
+            let time_remaining = self.target_duration_ms.unwrap() - current_duration;
+            if time_remaining <= *acceleration_duration_ms {
+                self.slow_down();
+                return Some(self.current_delay.to_num::<u32>());
+            }
         }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
         // Else, we need to accelerate.
         if self.current_delay == self.target_delay {
+            if self.acceleration_duration_ms.is_none() {
+                self.acceleration_duration_ms = Some(current_duration);
+            }
             self.current_step += Fix::ONE;
             Some(self.current_delay.to_num::<u32>())
         } else {
@@ -145,12 +145,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         }
 
         // If current step is bigger or equal to the target step, we're at the end of the move. Return None.
-        if self.current_step >= self.target_step {
+        if self.current_step >= self.target_step.unwrap() {
             return None;
         }
 
         // If the current step is bigger are equal than the target step minus the acceleration steps, we need to slow down.
-        if self.current_step >= self.target_step - self.acceleration_steps {
+        if self.current_step >= self.target_step.unwrap() - self.acceleration_steps {
             self.slow_down();
             return Some(self.current_delay.to_num::<u32>());
         }
