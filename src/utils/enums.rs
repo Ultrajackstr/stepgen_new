@@ -1,3 +1,5 @@
+use core::fmt::Display;
+
 // Error Enum
 #[derive(Debug)]
 pub enum Error {
@@ -13,6 +15,12 @@ impl Error {
             Error::BothStepTargetAndDuration => "Multiple targets: Step target and duration target",
             Error::InvalidState => "Invalid state",
         }
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        write!(f, "{}", self.description())
     }
 }
 
