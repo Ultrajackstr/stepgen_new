@@ -40,13 +40,11 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
-    pub fn new(target_rpm: u32, accel: u32, target_step: Option<u64>, target_duration_ms: Option<u64>) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
-        if target_step.is_none() && target_duration_ms.is_none() {
-            return Err(Error::NoStepTargetAndNoDuration);
-        } else if target_step.is_some() && target_duration_ms.is_some() {
+    pub fn new(target_rpm: u32, accel: u32, target_step: u64, target_duration_ms: u64) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
+        if target_step != 0 && target_duration_ms != 0 {
             return Err(Error::BothStepTargetAndDuration);
         }
-        let operating_mode = if target_step.is_some() {
+        let operating_mode = if target_step != 0 {
             OperatingMode::Step
         } else {
             OperatingMode::Duration
@@ -58,16 +56,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if first_delay < target_delay {
             first_delay = target_delay;
         }
-        let target_duration_ms = if let Some(target_duration_ms) = target_duration_ms {
-            TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms)
-        } else {
-            TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(0)
-        };
-        let target_step = if let Some(target_step) = target_step {
-            target_step
-        } else {
-            0
-        };
+        let target_duration_ms = TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms);
         Ok(Stepgen {
             operating_mode,
             current_step: 0,
