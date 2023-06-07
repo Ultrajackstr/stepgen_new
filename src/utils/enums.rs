@@ -5,6 +5,7 @@ use core::fmt::Display;
 pub enum Error {
     NoStepTargetAndNoDuration,
     BothStepTargetAndDuration,
+    ZeroAcceleration,
     InvalidState,
 }
 
@@ -13,6 +14,7 @@ impl Error {
         match self {
             Error::NoStepTargetAndNoDuration => "No targets: No step target and no duration target",
             Error::BothStepTargetAndDuration => "Multiple targets: Step target and duration target",
+            Error::ZeroAcceleration => "Zero acceleration",
             Error::InvalidState => "Invalid state",
         }
     }

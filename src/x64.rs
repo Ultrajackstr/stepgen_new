@@ -40,7 +40,10 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
-    pub fn new(target_rpm: u32, accel: u32, target_step: u64, target_duration_ms: u64) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
+    pub fn new(target_rpm: u32, acceleration: u32, target_step: u64, target_duration_ms: u64) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
+        if acceleration == 0 {
+            return Err(Error::ZeroAcceleration);
+        }
         if target_step != 0 && target_duration_ms != 0 {
             return Err(Error::BothStepTargetAndDuration);
         }
@@ -51,7 +54,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         };
         // Convert target RPM to delay in timer ticks.
         let target_delay: Fix = Fix::from_num(60) / Fix::from_num(200) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
-        let mut first_delay: Fix = (TWO / (Fix::from_num(accel) * Fix::from_num(3.35))).sqrt() // 3.35 correction factor
+        let mut first_delay: Fix = (TWO / (Fix::from_num(acceleration) * Fix::from_num(3.35))).sqrt() // 3.35 correction factor
             * Fix::from_num(0.676) * Fix::from_num(TIMER_HZ_MICROS);
         if first_delay < target_delay {
             first_delay = target_delay;
@@ -72,13 +75,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Returns 'None' if should stop. Otherwise, returns delay as u32.
-    pub fn next_delay(&mut self, current_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>) -> Option<u64> {
-        if current_ms.is_none() && self.operating_mode == OperatingMode::Duration {
+    pub fn next_delay(&mut self, timer_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>) -> Option<u64> {
+        if timer_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
         }
         match self.operating_mode {
             OperatingMode::Step => self.next_delay_step(),
-            OperatingMode::Duration => self.next_delay_duration(current_ms.unwrap()),
+            OperatingMode::Duration => self.next_delay_duration(timer_ms.unwrap()),
         }
     }
 
@@ -94,7 +97,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             return None;
         }
         // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
-        if self.current_step == Fix::ZERO {
+        if self.current_step == 0 {
             self.acceleration_steps += Fix::ONE;
             self.current_step += 1;
             self.current_delay = self.first_delay;
@@ -127,7 +130,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Step operating mode
     fn next_delay_step(&mut self) -> Option<u64> {
         // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
-        if self.current_step == Fix::ZERO {
+        if self.current_step == 0 {
             self.acceleration_steps += Fix::ONE;
             self.current_step += 1;
             self.current_delay = self.first_delay;
