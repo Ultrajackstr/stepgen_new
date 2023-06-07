@@ -176,6 +176,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     fn slow_down(&mut self) {
         let denom: Fix = FOUR * self.acceleration_steps - Fix::ONE;
         self.current_delay += (TWO * self.current_delay) / denom;
+        if self.acceleration_steps == Fix::ZERO { // Prevent underflow
+            self.acceleration_steps = Fix::ONE;
+        }
         self.acceleration_steps -= Fix::ONE;
         self.current_step += 1;
     }
