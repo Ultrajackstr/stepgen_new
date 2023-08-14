@@ -32,7 +32,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
-    pub fn new(target_rpm: u16, accel: u16, target_step: u32) -> Stepgen<TIMER_HZ_MICROS> {
+    pub fn new(target_rpm: u16, accel: u16, target_step: u32, full_steps_per_rotation: u16) -> Stepgen<TIMER_HZ_MICROS> {
         if !(150..=4_800).contains(&accel) || target_rpm < 32 {
             return Stepgen {
                 current_step: Fix0::ZERO,
@@ -44,7 +44,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             };
         }
         // Convert target RPM to delay in timer ticks.
-        let target_delay: Fix = Fix::from_num(60) / Fix::from_num(200) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
+        let target_delay: Fix = Fix::from_num(60) / Fix::from_num(full_steps_per_rotation) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
         // Calculate first delay based on acceleration.
         let mut first_delay: Fix = Fix::from_num(Fix32::from_num(Fix18::from_num(2u8) / (Fix18::from_num(accel) * Fix18::from_num(3.35))).sqrt()
             * Fix32::from_num(0.676)) * Fix::from_num(TIMER_HZ_MICROS);
