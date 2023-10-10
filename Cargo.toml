@@ -13,9 +13,13 @@ exclude = [
 edition = "2021"
 
 [dependencies]
-fixed = "1.23.1"
-fixed-sqrt = "0.2.5"
-fixed-macro = "1.2.0"
+#fixed = "1.23.1"
+#fixed-sqrt = "0.2.5"
+#fixed-macro = "1.2.0"
+fixed = "2.0.0-alpha.12"
+fixed-macro = {git = "https://github.com/stellarLuminant/fixed-macro.git", branch = "fixed-2.0.0-alpha.10"}
+fixed-sqrt = {git = "ssh://git@github.com/Ultrajackstr/fixed-sqrt-rs.git", branch = "master"}
+
 fugit = "0.3.7"
 
 [profile.release]

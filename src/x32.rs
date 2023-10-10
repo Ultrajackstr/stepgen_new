@@ -1,15 +1,14 @@
 use fixed::FixedU32;
-use fixed::types::extra::{U0, U12, U18, U32};
 use fixed::types::U20F12;
 use fixed_macro::fixed;
 use fixed_sqrt::FixedSqrt;
 
-type Fix = FixedU32<U12>;
-type Fix18 = FixedU32<U18>;
+type Fix = FixedU32<12>;
+type Fix18 = FixedU32<18>;
 // Higher precision for the sqrt function.
-type Fix32 = FixedU32<U32>;
+type Fix32 = FixedU32<32>;
 // Higher precision for the sqrt function.
-type Fix0 = FixedU32<U0>; // Equivalent to u32.
+type Fix0 = FixedU32<0>; // Equivalent to u32.
 
 const TWO: U20F12 = fixed!(2: U20F12);
 const FOUR: U20F12 = fixed!(4: U20F12);

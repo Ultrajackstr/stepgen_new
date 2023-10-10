@@ -34,9 +34,9 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
 name = "fixed"
-version = "1.23.1"
+version = "1.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79386fdcec5e0fde91b1a6a5bcd89677d1f9304f7f986b154a1b9109038854d9"
+checksum = "02c69ce7e7c0f17aa18fdd9d0de39727adb9c6281f2ad12f57cbe54ae6e76e7d"
 dependencies = [
  "az",
  "bytemuck",
@@ -45,23 +45,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "fixed-macro"
-version = "1.2.0"
+name = "fixed"
+version = "2.0.0-alpha.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fd0c48af8cb14e02868f449f8a2187bd78af7a08da201fdc78d518ecb1675bc"
+checksum = "6cb9922e700f729a374059fb5372aaca7ce2ce47426ab6e97897ec7d8978fab8"
 dependencies = [
- "fixed",
+ "az",
+ "bytemuck",
+ "half",
+]
+
+[[package]]
+name = "fixed-macro"
+version = "1.1.1"
+source = "git+https://github.com/stellarLuminant/fixed-macro.git?branch=fixed-2.0.0-alpha.10#f7648a5dc9bfea0d3b5a74374701966f8f7a8264"
+dependencies = [
+ "fixed 2.0.0-alpha.12",
  "fixed-macro-impl",
  "fixed-macro-types",
 ]
 
 [[package]]
 name = "fixed-macro-impl"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c93086f471c0a1b9c5e300ea92f5cd990ac6d3f8edf27616ef624b8fa6402d4b"
+version = "1.1.1"
+source = "git+https://github.com/stellarLuminant/fixed-macro.git?branch=fixed-2.0.0-alpha.10#f7648a5dc9bfea0d3b5a74374701966f8f7a8264"
 dependencies = [
- "fixed",
+ "fixed 1.24.0",
  "paste",
  "proc-macro-error",
  "proc-macro2",
@@ -71,21 +80,19 @@ dependencies = [
 
 [[package]]
 name = "fixed-macro-types"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "044a61b034a2264a7f65aa0c3cd112a01b4d4ee58baace51fead3f21b993c7e4"
+version = "1.1.1"
+source = "git+https://github.com/stellarLuminant/fixed-macro.git?branch=fixed-2.0.0-alpha.10#f7648a5dc9bfea0d3b5a74374701966f8f7a8264"
 dependencies = [
- "fixed",
+ "fixed 2.0.0-alpha.12",
  "fixed-macro-impl",
 ]
 
 [[package]]
 name = "fixed-sqrt"
 version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af725dbdc8dd186b6914026b51e43d99b332e8e816d3b495b84bf8304ac17b73"
+source = "git+ssh://git@github.com/Ultrajackstr/fixed-sqrt-rs.git?branch=master#c9e91c51a66d71bf64bf1cbfeeb8ca73e515692f"
 dependencies = [
- "fixed",
+ "fixed 2.0.0-alpha.12",
  "integer-sqrt",
  "typenum",
 ]
@@ -126,9 +133,9 @@ dependencies = [
 
 [[package]]
 name = "num-traits"
-version = "0.2.16"
+version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f30b0abd723be7e2ffca1272140fac1a2f084c77ec3e123c192b66af1ee9e6c2"
+checksum = "39e3200413f237f41ab11ad6d161bc7239c84dcb631773ccd7de3dfe4b5c267c"
 dependencies = [
  "autocfg",
 ]
@@ -165,9 +172,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.67"
+version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d433d9f1a3e8c1263d9456598b16fec66f4acc9a74dacffd35c7bb09b3a1328"
+checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
 dependencies = [
  "unicode-ident",
 ]
@@ -185,7 +192,7 @@ dependencies = [
 name = "stepgen_new"
 version = "0.3.1"
 dependencies = [
- "fixed",
+ "fixed 2.0.0-alpha.12",
  "fixed-macro",
  "fixed-sqrt",
  "fugit",
