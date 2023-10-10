@@ -24,7 +24,7 @@ fugit = "0.3.7"
 
 [profile.release]
 opt-level = 3
-lto = true
+lto = "fat"
 
 # Optimize all dependencies even in debug builds:
 [profile.dev.package."*"]
