@@ -16,9 +16,9 @@ checksum = "7b7e4c2464d97fe331d41de9d5db0def0a96f4d823b8b32a2efd503578988973"
 
 [[package]]
 name = "bytemuck"
-version = "1.14.0"
+version = "1.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "374d28ec25809ee0e23827c2ab573d729e293f281dfe393500e7ad618baa61c6"
+checksum = "ed2490600f404f2b94c167e31d3ed1d5f3c225a0f3b80230053b3e0b7b962bd9"
 
 [[package]]
 name = "cfg-if"
@@ -46,7 +46,7 @@ dependencies = [
 [[package]]
 name = "fixed-macro"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a4af5caa8de03722f2445470dd1a036870d9389e"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f9c01243e0562da6079114a8ff0dcc4f62de04ef"
 dependencies = [
  "fixed",
  "fixed-macro-impl",
@@ -56,20 +56,20 @@ dependencies = [
 [[package]]
 name = "fixed-macro-impl"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a4af5caa8de03722f2445470dd1a036870d9389e"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f9c01243e0562da6079114a8ff0dcc4f62de04ef"
 dependencies = [
  "fixed",
  "paste",
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 2.0.38",
+ "syn 2.0.48",
 ]
 
 [[package]]
 name = "fixed-macro-types"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a4af5caa8de03722f2445470dd1a036870d9389e"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f9c01243e0562da6079114a8ff0dcc4f62de04ef"
 dependencies = [
  "fixed",
  "fixed-macro-impl",
@@ -78,7 +78,7 @@ dependencies = [
 [[package]]
 name = "fixed-sqrt"
 version = "0.2.5"
-source = "git+https://github.com/Ultrajackstr/fixed-sqrt-rs.git?branch=master#c9e91c51a66d71bf64bf1cbfeeb8ca73e515692f"
+source = "git+https://github.com/Ultrajackstr/fixed-sqrt-rs.git?branch=master#ff2d1dd61373b4dc9f18b6ee748be484806ed114"
 dependencies = [
  "fixed",
  "integer-sqrt",
@@ -160,18 +160,18 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.69"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
+checksum = "e2422ad645d89c99f8f3e6b88a9fdeca7fabeac836b1002371c4367c8f984aae"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.33"
+version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae"
+checksum = "291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef"
 dependencies = [
  "proc-macro2",
 ]
@@ -198,9 +198,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.38"
+version = "2.0.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e96b79aaa137db8f61e26363a0c9b47d8b4ec75da28b7d1d614c2303e232408b"
+checksum = "0f3531638e407dfc0814761abb7c00a5b54992b849452a0646b7f65c9f770f3f"
 dependencies = [
  "proc-macro2",
  "quote",
