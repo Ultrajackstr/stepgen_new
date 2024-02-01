@@ -44,6 +44,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if acceleration == 0 {
             return Err(Error::ZeroAcceleration);
         }
+        if target_rpm == 0 {
+            return Err(Error::ZeroRpm);
+        }
         if target_step != 0 && target_duration_ms != 0 {
             return Err(Error::BothStepTargetAndDuration);
         }
