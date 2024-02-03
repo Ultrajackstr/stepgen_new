@@ -107,11 +107,11 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         }
 
         // If the time remaining is less than the time it took to accelerate, slow down.
-            let time_remaining = self.target_duration_ms - self.current_duration_ms;
-            if time_remaining <= self.acceleration_duration_ms {
-                self.slow_down();
-                return Some(self.current_delay.to_num::<u64>());
-            }
+        let time_remaining = self.target_duration_ms - self.current_duration_ms;
+        if time_remaining <= self.acceleration_duration_ms {
+            self.slow_down();
+            return Some(self.current_delay.to_num::<u64>());
+        }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
         // Else, we need to accelerate.
@@ -183,5 +183,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
     pub fn get_current_step(&self) -> u64 {
         self.current_step
+    }
+
+    pub fn get_acceleration_steps(&self) -> u64 {
+        self.acceleration_steps.to_num::<u64>()
+    }
+
+    pub fn get_acceleration_duration_ms(&self) -> u64 {
+        self.acceleration_duration_ms.ticks()
     }
 }
