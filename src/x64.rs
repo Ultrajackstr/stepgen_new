@@ -52,7 +52,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         };
         // Convert target RPM to delay in timer ticks.
         let target_delay = 60.0 /full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm as f32;
-        let mut first_delay = (2.0 / acceleration as f32 * 3.35).sqrt() // 3.35 correction factor
+        let mut first_delay = (2.0 / acceleration as f32).sqrt() // 3.35 correction factor
             * 0.676 * TIMER_HZ_MICROS as f32;
         if first_delay < target_delay {
             first_delay = target_delay;
