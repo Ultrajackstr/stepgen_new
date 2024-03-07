@@ -168,7 +168,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             Some(alpha) => {
                 let progress = self.acceleration_steps as f32 / self.get_acceleration_steps() as f32;
                 let sigmoid = 1.0 / (1.0 + (-alpha * progress).exp());
-                self.current_delay = (self.first_delay as f32 + (self.target_delay - self.first_delay) as f32 * sigmoid) as u64;
+                self.current_delay = (self.first_delay as f32 + self.target_delay as f32 - self.first_delay as f32 * sigmoid) as u64;
             }
             None => {
                 let denom = 4 * self.acceleration_steps + 1;
@@ -188,7 +188,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             Some(alpha) => {
                 let progress = self.acceleration_steps as f32 / self.get_acceleration_steps() as f32;
                 let sigmoid = 1.0 / (1.0 + (-alpha * progress).exp());
-                self.current_delay = (self.target_delay as f32 + (self.first_delay - self.target_delay) as f32 * (1.0 - sigmoid)) as u64;
+                self.current_delay = (self.target_delay as f32 + self.first_delay as f32 - self.target_delay as f32 * (1.0 - sigmoid)) as u64;
             }
             None => {
                 let denom = 4 * self.acceleration_steps - 1;
