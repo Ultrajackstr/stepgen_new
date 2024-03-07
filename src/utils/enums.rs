@@ -8,6 +8,7 @@ pub enum Error {
     ZeroAcceleration,
     ZeroRpm,
     InvalidState,
+    InvalidAlpha,
 }
 
 impl Error {
@@ -18,6 +19,7 @@ impl Error {
             Error::ZeroAcceleration => "Zero acceleration",
             Error::ZeroRpm => "Zero RPM",
             Error::InvalidState => "Invalid state",
+            Error::InvalidAlpha => "Invalid alpha",
         }
     }
 }

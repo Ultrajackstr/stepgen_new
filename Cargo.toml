@@ -13,14 +13,11 @@ exclude = [
 edition = "2021"
 
 [dependencies]
-#fixed = "1.23.1"
-#fixed-sqrt = "0.2.5"
-#fixed-macro = "1.2.0"
 fixed = "2.0.0-alpha.26.0"
 fixed-macro = {git = "https://github.com/Ultrajackstr/fixed-macro.git", branch = "master"}
 fixed-sqrt = {git = "https://github.com/Ultrajackstr/fixed-sqrt-rs.git", branch = "master"}
-
 fugit = "0.3"
+micromath = "2.1.0"
 
 [profile.release]
 opt-level = 3
