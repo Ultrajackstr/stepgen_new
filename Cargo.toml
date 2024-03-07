@@ -16,7 +16,7 @@ edition = "2021"
 #fixed = "1.23.1"
 #fixed-sqrt = "0.2.5"
 #fixed-macro = "1.2.0"
-fixed = "2.0.0-alpha.25.1"
+fixed = "2.0.0-alpha.26.0"
 fixed-macro = {git = "https://github.com/Ultrajackstr/fixed-macro.git", branch = "master"}
 fixed-sqrt = {git = "https://github.com/Ultrajackstr/fixed-sqrt-rs.git", branch = "master"}
 

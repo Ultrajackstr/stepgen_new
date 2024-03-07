@@ -1,7 +1,6 @@
 use fixed::FixedU32;
 use fixed::types::U20F12;
 use fixed_macro::fixed;
-use fixed_sqrt::FixedSqrt;
 
 type Fix = FixedU32<12>;
 type Fix18 = FixedU32<18>;

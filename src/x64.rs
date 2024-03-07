@@ -1,7 +1,6 @@
 use fixed::FixedU64;
 use fixed::types::U32F32;
 use fixed_macro::fixed;
-use fixed_sqrt::FixedSqrt;
 use fugit::{TimerDurationU64, TimerInstantU64};
 
 use crate::utils::enums::{Error, OperatingMode};
