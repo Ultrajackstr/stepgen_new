@@ -16,9 +16,9 @@ checksum = "7b7e4c2464d97fe331d41de9d5db0def0a96f4d823b8b32a2efd503578988973"
 
 [[package]]
 name = "bytemuck"
-version = "1.14.2"
+version = "1.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea31d69bda4949c1c1562c1e6f042a1caefac98cdc8a298260a2ff41c1e2d42b"
+checksum = "a2ef034f05691a48569bd920a96c81b9d91bbad1ab5ac7c4616c1f6ef36cb79f"
 
 [[package]]
 name = "cfg-if"
@@ -46,7 +46,7 @@ dependencies = [
 [[package]]
 name = "fixed-macro"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f57d4bc128ec59f0fcded4673a1ff9cf835f17b4"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a8dba9af00732dba24765965c119fdf39e9b08a1"
 dependencies = [
  "fixed",
  "fixed-macro-impl",
@@ -56,20 +56,20 @@ dependencies = [
 [[package]]
 name = "fixed-macro-impl"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f57d4bc128ec59f0fcded4673a1ff9cf835f17b4"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a8dba9af00732dba24765965c119fdf39e9b08a1"
 dependencies = [
  "fixed",
  "paste",
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 2.0.48",
+ "syn 2.0.52",
 ]
 
 [[package]]
 name = "fixed-macro-types"
 version = "1.2.0"
-source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#f57d4bc128ec59f0fcded4673a1ff9cf835f17b4"
+source = "git+https://github.com/Ultrajackstr/fixed-macro.git?branch=master#a8dba9af00732dba24765965c119fdf39e9b08a1"
 dependencies = [
  "fixed",
  "fixed-macro-impl",
@@ -78,7 +78,7 @@ dependencies = [
 [[package]]
 name = "fixed-sqrt"
 version = "0.2.5"
-source = "git+https://github.com/Ultrajackstr/fixed-sqrt-rs.git?branch=master#ec10091574e5e9449e8b5e7ca65c7ac59ce478ea"
+source = "git+https://github.com/Ultrajackstr/fixed-sqrt-rs.git?branch=master#1fb41bdcf869cc0f1f798ab5a6118f2a9bcdcbd7"
 dependencies = [
  "fixed",
  "integer-sqrt",
@@ -102,9 +102,9 @@ checksum = "1d758ba1b47b00caf47f24925c0074ecb20d6dfcffe7f6d53395c0465674841a"
 
 [[package]]
 name = "half"
-version = "2.3.1"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc52e53916c08643f1b56ec082790d1e86a32e58dc5268f897f313fbae7b4872"
+checksum = "b5eceaaeec696539ddaf7b333340f1af35a5aa87ae3e4f3ead0532f72affab2e"
 dependencies = [
  "cfg-if",
  "crunchy",
@@ -127,9 +127,9 @@ checksum = "c3c8dda44ff03a2f238717214da50f65d5a53b45cd213a7370424ffdb6fae815"
 
 [[package]]
 name = "num-traits"
-version = "0.2.17"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39e3200413f237f41ab11ad6d161bc7239c84dcb631773ccd7de3dfe4b5c267c"
+checksum = "da0df0e5185db44f69b44f26786fe401b6c293d1907744beaa7fa62b2e5a517a"
 dependencies = [
  "autocfg",
 ]
@@ -205,9 +205,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.48"
+version = "2.0.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f3531638e407dfc0814761abb7c00a5b54992b849452a0646b7f65c9f770f3f"
+checksum = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07"
 dependencies = [
  "proc-macro2",
  "quote",

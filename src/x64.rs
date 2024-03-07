@@ -10,22 +10,22 @@ const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
 pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     // Operating mode
     operating_mode: OperatingMode,
-    current_step: u64,
+    current_step: f32,
     // Amount of acceleration steps we've taken so far
-    acceleration_steps: u64,
+    acceleration_steps: f32,
     // How long did the acceleration take
     acceleration_duration_ms: TimerDurationU64<TIMER_HZ_MILLIS>,
     // Previously calculated delay
-    current_delay: u64,
+    current_delay: f32,
     current_duration_ms: TimerDurationU64<TIMER_HZ_MILLIS>,
     // First step delay
-    first_delay: u64,
+    first_delay: f32,
     // Target step
-    target_step: u64,
+    target_step: f32,
     // Target duration
     target_duration_ms: TimerDurationU64<TIMER_HZ_MILLIS>,
     // Target speed delay
-    target_delay: u64,
+    target_delay: f32,
     // Start time
     start_time_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>,
     is_acceleration_done: bool,
@@ -51,9 +51,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             OperatingMode::Duration
         };
         // Convert target RPM to delay in timer ticks.
-        let target_delay: u64 = (60.0 /full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm as f32) as u64;
-        let mut first_delay: u64 = ((2.0 / acceleration as f32 * 3.35).sqrt() // 3.35 correction factor
-            * 0.676 * TIMER_HZ_MICROS as f32) as u64;
+        let target_delay = 60.0 /full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm as f32;
+        let mut first_delay = (2.0 / acceleration as f32 * 3.35).sqrt() // 3.35 correction factor
+            * 0.676 * TIMER_HZ_MICROS as f32;
         if first_delay < target_delay {
             first_delay = target_delay;
         }
@@ -68,13 +68,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         let target_duration_ms = TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms);
         Ok(Stepgen {
             operating_mode,
-            current_step: 0,
-            acceleration_steps: 0,
+            current_step: 0.0,
+            acceleration_steps: 0.0,
             acceleration_duration_ms: TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(0),
-            current_delay: 0,
+            current_delay: 0.0,
             current_duration_ms: TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(0),
             first_delay,
-            target_step,
+            target_step: target_step as f32,
             target_duration_ms,
             target_delay,
             start_time_ms: None,
@@ -99,10 +99,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
             self.start_time_ms = Some(current_ms);
-            self.acceleration_steps += 1;
+            self.acceleration_steps += 1.0;
             self.current_delay = self.first_delay;
-            self.current_step += 1;
-            return Some(self.first_delay);
+            self.current_step += 1.0;
+            return Some(self.first_delay as u64);
         }
         self.current_duration_ms = current_ms - self.start_time_ms.unwrap();
 
@@ -115,29 +115,29 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         let time_remaining = self.target_duration_ms - self.current_duration_ms;
         if time_remaining <= self.acceleration_duration_ms {
             self.slow_down();
-            return Some(self.current_delay);
+            return Some(self.current_delay as u64);
         }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
         // Else, we need to accelerate.
         if self.current_delay == self.target_delay {
             self.is_acceleration_done = true;
-            self.current_step += 1;
-            Some(self.current_delay)
+            self.current_step += 1.0;
+            Some(self.current_delay as u64)
         } else {
             self.speed_up();
-            Some(self.current_delay)
+            Some(self.current_delay as u64)
         }
     }
 
     /// Step operating mode
     pub fn next_delay_step(&mut self) -> Option<u64> {
         // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
-        if self.current_step == 0 {
-            self.acceleration_steps += 1;
-            self.current_step += 1;
+        if self.current_step == 0.0 {
+            self.acceleration_steps += 1.0;
+            self.current_step += 1.0;
             self.current_delay = self.first_delay;
-            return Some(self.first_delay);
+            return Some(self.first_delay as u64);
         }
 
         // If current step is bigger or equal to the target step, we're at the end of the move. Return None.
@@ -148,66 +148,66 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // If the current step is bigger or equal than the target step minus the acceleration steps, we need to slow down.
         if self.current_step >= self.target_step - self.acceleration_steps {
             self.slow_down();
-            return Some(self.current_delay);
+            return Some(self.current_delay as u64);
         }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
         // Else, we need to accelerate.
         if self.current_delay == self.target_delay {
             self.is_acceleration_done = true;
-            self.current_step += 1;
-            Some(self.current_delay)
+            self.current_step += 1.0;
+            Some(self.current_delay as u64)
         } else {
             self.speed_up();
-            Some(self.current_delay)
+            Some(self.current_delay as u64)
         }
     }
 
     fn speed_up(&mut self) {
         match self.alpha_sigmoid {
             Some(alpha) => {
-                let progress = self.acceleration_steps as f32 / self.get_acceleration_steps() as f32;
+                let progress = self.acceleration_steps / self.get_acceleration_steps() as f32;
                 let sigmoid = 1.0 / (1.0 + (-alpha * progress).exp());
-                self.current_delay = (self.first_delay as f32 + self.target_delay as f32 - self.first_delay as f32 * sigmoid) as u64;
+                self.current_delay = self.first_delay + self.target_delay - self.first_delay * sigmoid;
             }
             None => {
-                let denom = 4 * self.acceleration_steps + 1;
-                self.current_delay -= ((2.0 * self.current_delay as f32) / denom as f32) as u64;
+                let denom = 4.0 * self.acceleration_steps + 1.0;
+                self.current_delay -= (2.0 * self.current_delay) / denom;
                 if self.current_delay < self.target_delay {
                     self.current_delay = self.target_delay;
                 }
             }
         }
-        self.acceleration_steps += 1;
+        self.acceleration_steps += 1.0;
         self.acceleration_duration_ms = self.current_duration_ms;
-        self.current_step += 1;
+        self.current_step += 1.0
     }
 
     fn slow_down(&mut self) {
         match self.alpha_sigmoid {
             Some(alpha) => {
-                let progress = self.acceleration_steps as f32 / self.get_acceleration_steps() as f32;
+                let progress = self.acceleration_steps / self.get_acceleration_steps() as f32;
                 let sigmoid = 1.0 / (1.0 + (-alpha * progress).exp());
-                self.current_delay = (self.target_delay as f32 + self.first_delay as f32 - self.target_delay as f32 * (1.0 - sigmoid)) as u64;
+                self.current_delay = self.target_delay + self.first_delay - self.target_delay * (1.0 - sigmoid);
             }
             None => {
-                let denom = 4 * self.acceleration_steps - 1;
-                self.current_delay += ((2.0 * self.current_delay as f32) / denom as f32) as u64;
+                let denom = 4.0 * self.acceleration_steps - 1.0;
+                self.current_delay += (2.0 * self.current_delay) / denom;
             }
         }
-        if self.acceleration_steps == 0 {
-            self.acceleration_steps = 1;
+        if self.acceleration_steps == 0.0 {
+            self.acceleration_steps = 1.0;
         }
-        self.acceleration_steps -= 1;
-        self.current_step += 1;
+        self.acceleration_steps -= 1.0;
+        self.current_step += 1.0;
     }
 
     pub fn get_current_step(&self) -> u64 {
-        self.current_step
+        self.current_step as u64
     }
 
     pub fn get_acceleration_steps(&self) -> u64 {
-        self.acceleration_steps
+        self.acceleration_steps as u64
     }
 
     pub fn get_acceleration_duration_ms(&self) -> u64 {
