@@ -62,13 +62,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             target_rpm as f32
         };
         // Convert target RPM to delay in timer ticks.
-        let target_delay = 60.0 / full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
-        let mut first_delay = (2.0 / (3.35 * acceleration_rpm_s as f32)).sqrt() // 3.35 correction factor
+        let target_delay_us = 60.0 / full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
+        let mut first_delay_us = (2.0 / (3.35 * acceleration_rpm_s as f32)).sqrt() // 3.35 correction factor
             * 0.676 * TIMER_HZ_MICROS as f32;
-        if first_delay < target_delay {
-            first_delay = target_delay;
+        if first_delay_us < target_delay_us {
+            first_delay_us = target_delay_us;
         }
-        let alpha = find_alpha_value(first_delay * 1000.0, target_delay * 1000.0, expected_accel_duration_ms, 1E-4f32);
+        let alpha = find_alpha_value(first_delay_us, target_delay_us, expected_accel_duration_ms * 1000.0, 1.0)?;
         Ok(Stepgen {
             operating_mode,
             current_step: 0.0,
@@ -76,10 +76,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             acceleration_duration_ms: TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(0),
             current_delay_us: 0.0,
             current_duration_ms: TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(0),
-            first_delay_us: first_delay,
+            first_delay_us,
             target_step: target_step as f32,
             target_duration_ms,
-            target_delay_us: target_delay,
+            target_delay_us,
             start_time_ms: None,
             is_acceleration_done: false,
             is_sigmoid_profile: enable_sigmoid_profile,
