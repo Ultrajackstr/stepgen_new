@@ -54,9 +54,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             OperatingMode::Duration
         };
         let target_duration_ms = TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms);
-        let expected_accel_duration_ms = target_rpm as f32 / acceleration_rpm_s as f32 * 1000.0;
+        let mut expected_accel_duration_ms = target_rpm as f32 / acceleration_rpm_s as f32 * 1000.0;
         let target_rpm = if expected_accel_duration_ms > target_duration_ms.ticks() as f32 / 2.0 {
             let half_duration_s = target_duration_ms.ticks() as f32 / 2.0 / 1000.0;
+            expected_accel_duration_ms /= 2.0;
             acceleration_rpm_s as f32 * half_duration_s
         } else {
             target_rpm as f32
