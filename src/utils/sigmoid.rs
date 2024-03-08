@@ -6,7 +6,7 @@ pub fn sigmoid_delay_us(current_delay_accumulator_us: f32, start_delay_us: f32, 
 }
 
 pub fn find_alpha_value(start_delay_us: f32, end_delay_us: f32, accel_duration_us: f32, tolerance_us: f32) -> Result<f32, Error> {
-    let mut start_alpha = 0.00001;
+    let mut start_alpha = 0.000001;
     let tolerance_range = end_delay_us - tolerance_us..=end_delay_us + tolerance_us;
     while !tolerance_range.contains(&sigmoid_delay_us(accel_duration_us, start_delay_us, end_delay_us, start_alpha, accel_duration_us).round()) {
         start_alpha *= 1.1;
