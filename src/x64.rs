@@ -57,7 +57,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         };
         // Convert target RPM to delay in timer ticks.
         let target_delay: Fix = Fix::from_num(60) / Fix::from_num(full_steps_per_revolution) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
-        let mut first_delay: Fix = (TWO / (Fix::from_num(acceleration) * Fix::from_num(3.35))).sqrt() // 3.35 correction factor
+        let angle_rad = Fix::from_num(360) / Fix::from_num(full_steps_per_revolution) * Fix::PI / Fix::from_num(180);
+        let accel_rad_s2 = Fix::from_num(acceleration) * TWO * Fix::PI / Fix::from_num(60);
+        let mut first_delay: Fix = (TWO * (angle_rad) / accel_rad_s2).sqrt()
             * Fix::from_num(0.676) * Fix::from_num(TIMER_HZ_MICROS);
         if first_delay < target_delay {
             first_delay = target_delay;
@@ -195,7 +197,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     pub fn get_acceleration_duration_ms(&self) -> u64 {
         self.acceleration_duration_ms.ticks()
     }
-    
+
     pub fn is_acceleration_done(&self) -> bool {
         self.is_acceleration_done
     }

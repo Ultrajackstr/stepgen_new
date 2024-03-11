@@ -60,8 +60,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         };
         // Convert target RPM to delay in timer ticks.
         let target_delay: Fix = Fix::from_num(60) / Fix::from_num(full_steps_per_revolution) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
+        let angle_rad =Fix18::from_num(360) / Fix18::from_num(full_steps_per_revolution) * Fix18::PI / Fix18::from_num(180);
+        let accel_rad_s2 = Fix::from_num(acceleration) * TWO * Fix::PI / Fix::from_num(60);
         // Calculate first delay based on acceleration.
-        let mut first_delay: Fix = Fix::from_num(Fix32::from_num(Fix18::from_num(2u8) / (Fix18::from_num(acceleration) * Fix18::from_num(3.35))).sqrt()
+        let mut first_delay: Fix = Fix::from_num(Fix32::from_num(Fix::from_num(Fix18::from_num(2u8) * angle_rad) / accel_rad_s2).sqrt()
             * Fix32::from_num(0.676)) * Fix::from_num(TIMER_HZ_MICROS);
         // If first_delay is smaller than target_delay, first_delay = target_delay
         if first_delay < target_delay {
@@ -175,7 +177,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         self.acceleration_duration_ms = self.current_duration_ms;
         self.current_step += 1;
     }
-    
+
     /// Slow down function
     fn slow_down(&mut self) {
         let denom: Fix = FOUR * Fix::from_num(self.acceleration_steps) - Fix::ONE;
