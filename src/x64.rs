@@ -1,3 +1,4 @@
+use core::f32::consts::PI;
 use fugit::{TimerDurationU64, TimerInstantU64};
 use micromath::F32Ext;
 
@@ -38,7 +39,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
-    pub fn new(target_rpm: u32, acceleration_rpm_s: u32, target_step: u64, target_duration_ms: u64, enable_sigmoid_profile: bool, full_steps_per_revolution: u16) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
+    pub fn new(target_rpm: u32, acceleration_rpm_s: u32, target_step: u64, target_duration_ms: u64, enable_sigmoid_profile: bool, steps_per_revolution: u16) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
         if acceleration_rpm_s == 0 {
             return Err(Error::ZeroAcceleration);
         }
@@ -63,8 +64,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             target_rpm as f32
         };
         // Convert target RPM to delay in timer ticks.
-        let target_delay_us = 60.0 / full_steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
-        let mut first_delay_us = (2.0 / (3.35 * acceleration_rpm_s as f32)).sqrt() // 3.35 correction factor
+        let target_delay_us = 60.0 / steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
+        let angle_rad = 360.0 / steps_per_revolution as f32 * PI / 180.0;
+        let accel_rad_s2 = acceleration_rpm_s as f32 * 2.0 * PI / 60.0;
+        let mut first_delay_us = (2.0 * (angle_rad) / accel_rad_s2).sqrt()
             * 0.676 * TIMER_HZ_MICROS as f32;
         if first_delay_us < target_delay_us {
             first_delay_us = target_delay_us;
@@ -110,7 +113,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             self.current_delay_us = self.first_delay_us;
             self.current_step += 1.0;
             self.current_delay_accumulator_us  += self.first_delay_us;
-            return Some(self.first_delay_us as u64);
+            return Some(self.first_delay_us.round() as u64);
         }
         self.current_duration_ms = current_ms - self.start_time_ms.unwrap();
 
@@ -124,7 +127,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if time_remaining <= self.acceleration_duration_ms {
             self.slow_down();
             self.current_delay_accumulator_us += self.current_delay_us;
-            return Some(self.current_delay_us as u64);
+            return Some(self.current_delay_us.round() as u64);
         }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
@@ -133,11 +136,11 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             self.is_acceleration_done = true;
             self.current_step += 1.0;
             self.current_delay_accumulator_us += self.current_delay_us;
-            Some(self.current_delay_us as u64)
+            Some(self.current_delay_us.round() as u64)
         } else {
             self.speed_up();
             self.current_delay_accumulator_us += self.current_delay_us;
-            Some(self.current_delay_us as u64)
+            Some(self.current_delay_us.round() as u64)
         }
     }
 
@@ -148,7 +151,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             self.acceleration_steps += 1.0;
             self.current_step += 1.0;
             self.current_delay_us = self.first_delay_us;
-            return Some(self.first_delay_us as u64);
+            return Some(self.first_delay_us.round() as u64);
         }
 
         // If current step is bigger or equal to the target step, we're at the end of the move. Return None.
@@ -159,7 +162,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // If the current step is bigger or equal than the target step minus the acceleration steps, we need to slow down.
         if self.current_step >= self.target_step - self.acceleration_steps {
             self.slow_down();
-            return Some(self.current_delay_us as u64);
+            return Some(self.current_delay_us.round() as u64);
         }
 
         // If the current delay is equal to the target delay, we're at the target speed. Return the current delay.
@@ -167,10 +170,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         if self.current_delay_us == self.target_delay_us {
             self.is_acceleration_done = true;
             self.current_step += 1.0;
-            Some(self.current_delay_us as u64)
+            Some(self.current_delay_us.round() as u64)
         } else {
             self.speed_up();
-            Some(self.current_delay_us as u64)
+            Some(self.current_delay_us.round() as u64)
         }
     }
 
