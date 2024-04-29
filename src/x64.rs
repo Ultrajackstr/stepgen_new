@@ -3,7 +3,6 @@ use fugit::{TimerDurationU64, TimerInstantU64};
 use micromath::F32Ext;
 
 use crate::utils::enums::{Error, OperatingMode};
-use crate::utils::sigmoid::{find_alpha_value, sigmoid_delay_us};
 use crate::utils::sin::{sin_accel_delay_us, sin_decel_delay_us};
 
 const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
@@ -63,9 +62,9 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         } else {
             target_rpm as f32
         };
-        let sin_coeff = 0.6 /(target_rpm * target_duration_ms.ticks() as f32 / 1000.0);
+        let sin_coeff = (expected_accel_duration_ms / 1000.0) * 0.6 /(target_rpm * expected_accel_duration_ms / 1000.0);
         // Convert target RPM to delay in timer ticks.
-        let target_delay_us = 60.0 / steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm as f32;
+        let target_delay_us = 60.0 / steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
         let angle_rad = 360.0 / steps_per_revolution as f32 * PI / 180.0;
         let accel_rad_s2 = acceleration_rpm_s as f32 * 2.0 * PI / 60.0;
         let mut first_delay_us = (2.0 * (angle_rad) / accel_rad_s2).sqrt()
@@ -180,7 +179,14 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         //TODO: change this
         match true {
             true => {
-                self.current_delay_us = sin_accel_delay_us(self.current_delay_accumulator_us, self.sin_coeff);
+                let new_delay_us = sin_accel_delay_us(self.current_delay_accumulator_us, self.expected_accel_duration_ms, self.sin_coeff);
+                if new_delay_us < self.target_delay_us {
+                    self.current_delay_us = self.target_delay_us;
+                } else if new_delay_us > self.first_delay_us {
+                    self.current_delay_us = self.first_delay_us;
+                } else {
+                    self.current_delay_us = new_delay_us;
+                }
             }
             false => {
                 let denom = 4.0 * self.acceleration_steps + 1.0;
@@ -199,7 +205,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         //TODO: change this
         match true {
             true => {
-                sin_decel_delay_us(self.current_delay_accumulator_us - (self.target_duration_ms.ticks() as f32 - self.expected_accel_duration_ms) * 1000.0, self.sin_coeff);
+                sin_decel_delay_us(self.current_delay_accumulator_us - (self.target_duration_ms.ticks() as f32 - self.expected_accel_duration_ms) * 1000.0, self.expected_accel_duration_ms, self.sin_coeff);
             }
             false => {
                 let denom = 4.0 * self.acceleration_steps - 1.0;
