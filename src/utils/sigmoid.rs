@@ -1,5 +1,8 @@
+use core::f32::consts::PI;
+use fugit::{TimerDurationU64, TimerInstantU64};
 use micromath::F32Ext;
 use crate::utils::enums::Error;
+
 
 pub fn sigmoid_delay_us(current_delay_accumulator_us: f32, start_delay_us: f32, end_delay_us: f32, alpha: f32, accel_duration_us: f32) -> f32 {
     start_delay_us + (end_delay_us - start_delay_us) / (1.0 + (-alpha * (current_delay_accumulator_us - accel_duration_us / 2.0)).exp())
