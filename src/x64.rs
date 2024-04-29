@@ -62,7 +62,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         } else {
             target_rpm as f32
         };
-        let sin_coeff = (expected_accel_duration_ms / 1000.0) * 0.6 / (target_rpm * expected_accel_duration_ms / 1000.0);
+        let sin_coeff = (expected_accel_duration_ms / 1000.0) * 0.6 / (target_rpm * expected_accel_duration_ms / 1000.0) * 1_000_000.0;
         // Convert target RPM to delay in timer ticks.
         let target_delay_us = 60.0 / steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
         let angle_rad = 360.0 / steps_per_revolution as f32 * PI / 180.0;
