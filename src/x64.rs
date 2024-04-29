@@ -62,7 +62,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         } else {
             target_rpm as f32
         };
-        let sin_coeff = (expected_accel_duration_ms / 1000.0) * 0.6 /(target_rpm * expected_accel_duration_ms / 1000.0);
+        let sin_coeff = (expected_accel_duration_ms / 1000.0) * 0.6 / (target_rpm * expected_accel_duration_ms / 1000.0);
         // Convert target RPM to delay in timer ticks.
         let target_delay_us = 60.0 / steps_per_revolution as f32 * TIMER_HZ_MICROS as f32 / target_rpm;
         let angle_rad = 360.0 / steps_per_revolution as f32 * PI / 180.0;
@@ -110,7 +110,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             self.acceleration_steps += 1.0;
             self.current_delay_us = self.first_delay_us;
             self.current_step += 1.0;
-            self.current_delay_accumulator_us  += self.first_delay_us;
+            self.current_delay_accumulator_us += self.first_delay_us;
             return Some(self.first_delay_us.round() as u64);
         }
         self.current_duration_ms = current_ms - self.start_time_ms.unwrap();
@@ -205,7 +205,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         //TODO: change this
         match true {
             true => {
-                sin_decel_delay_us(self.current_delay_accumulator_us - (self.target_duration_ms.ticks() as f32 - self.expected_accel_duration_ms) * 1000.0, self.expected_accel_duration_ms, self.sin_coeff);
+                let delay_us = sin_decel_delay_us(self.current_delay_accumulator_us - (self.target_duration_ms.ticks() as f32 - self.expected_accel_duration_ms) * 1000.0, self.expected_accel_duration_ms, self.sin_coeff);
+                if delay_us > self.first_delay_us {
+                    self.current_delay_us = self.first_delay_us;
+                } else {
+                    self.current_delay_us = delay_us;
+                }
             }
             false => {
                 let denom = 4.0 * self.acceleration_steps - 1.0;
