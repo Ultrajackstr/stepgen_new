@@ -10,6 +10,9 @@ type Fix = FixedU64<32>;
 const TWO: U32F32 = fixed!(2: U32F32);
 const FOUR: U32F32 = fixed!(4: U32F32);
 
+const FIX_ONE: Fix = Fix::ONE;
+const FIX_ZERO: Fix = Fix::ZERO;
+
 const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
 
 /// State of the stepgen.
@@ -97,9 +100,8 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
             self.start_time_ms = Some(current_ms);
-            self.acceleration_steps += Fix::ONE;
+            self.acceleration_steps += FIX_ONE;
             self.current_delay = self.first_delay;
-            self.current_step += 1;
             return Some(self.first_delay.round().to_num::<u64>());
         }
         self.current_duration_ms = current_ms - self.start_time_ms.unwrap();
@@ -120,7 +122,6 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // Else, we need to accelerate.
         if self.current_delay == self.target_delay {
             self.is_acceleration_done = true;
-            self.current_step += 1;
             Some(self.current_delay.round().to_num::<u64>())
         } else {
             self.speed_up();
@@ -132,7 +133,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     pub fn next_delay_step(&mut self) -> Option<u64> {
         // If current step is 0, we're at the start of the move. Return the first delay and increase acceleration steps and current step.
         if self.current_step == 0 {
-            self.acceleration_steps += Fix::ONE;
+            self.acceleration_steps += FIX_ONE;
             self.current_step += 1;
             self.current_delay = self.first_delay;
             return Some(self.current_delay.round().to_num::<u64>());
@@ -163,13 +164,13 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
     /// Speed up function
     fn speed_up(&mut self) {
-        let denom: Fix = FOUR * self.acceleration_steps + Fix::ONE;
+        let denom: Fix = FOUR * self.acceleration_steps + FIX_ONE;
         self.current_delay -= (TWO * self.current_delay) / denom;
         // if the calculated delay is less than the target delay, we are done speeding up.
         if self.current_delay < self.target_delay {
             self.current_delay = self.target_delay;
         }
-        self.acceleration_steps += Fix::ONE;
+        self.acceleration_steps += FIX_ONE;
         self.acceleration_duration_ms = self.current_duration_ms;
         self.current_step += 1;
     }
@@ -177,12 +178,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
 
     /// Slow down function
     fn slow_down(&mut self) {
-        let denom: Fix = FOUR * self.acceleration_steps - Fix::ONE;
+        let denom: Fix = FOUR * self.acceleration_steps - FIX_ONE;
         self.current_delay += (TWO * self.current_delay) / denom;
-        if self.acceleration_steps == Fix::ZERO { // Prevent underflow
-            self.acceleration_steps = Fix::ONE;
+        if self.acceleration_steps == FIX_ZERO { // Prevent underflow
+            self.acceleration_steps = FIX_ONE;
         }
-        self.acceleration_steps -= Fix::ONE;
+        self.acceleration_steps -= FIX_ONE;
         self.current_step += 1;
     }
 
