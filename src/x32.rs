@@ -117,6 +117,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         // If the time remaining is less than the time it took to accelerate, slow down.
         let time_remaining = self.target_duration_ms - self.current_duration_ms;
         if time_remaining <= self.acceleration_duration_ms {
+            self.is_acceleration_done = false;
             self.slow_down();
             return Some(self.current_delay.round().to_num::<u32>());
         }
