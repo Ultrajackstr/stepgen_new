@@ -1,5 +1,5 @@
-use fixed::FixedU64;
 use fixed::types::U32F32;
+use fixed::FixedU64;
 use fixed_macro::fixed;
 use fugit::{TimerDurationU64, TimerInstantU64};
 
@@ -43,7 +43,13 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
 
 impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
-    pub fn new(target_rpm: u32, acceleration: u32, target_step: u64, target_duration_ms: u64, steps_per_revolution: u16) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
+    pub fn new(
+        target_rpm: u32,
+        acceleration: u32,
+        target_step: u64,
+        target_duration_ms: u64,
+        steps_per_revolution: u16,
+    ) -> Result<Stepgen<TIMER_HZ_MICROS>, Error> {
         if acceleration == 0 {
             return Err(Error::ZeroAcceleration);
         }
@@ -59,15 +65,20 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
             OperatingMode::Duration
         };
         // Convert target RPM to delay in timer ticks.
-        let target_delay: Fix = Fix::from_num(60) / Fix::from_num(steps_per_revolution) * Fix::from_num(TIMER_HZ_MICROS) / Fix::from_num(target_rpm);
-        let angle_rad = Fix::from_num(360) / Fix::from_num(steps_per_revolution) * Fix::PI / Fix::from_num(180);
+        let target_delay: Fix = Fix::from_num(60) / Fix::from_num(steps_per_revolution)
+            * Fix::from_num(TIMER_HZ_MICROS)
+            / Fix::from_num(target_rpm);
+        let angle_rad =
+            Fix::from_num(360) / Fix::from_num(steps_per_revolution) * Fix::PI / Fix::from_num(180);
         let accel_rad_s2 = Fix::from_num(acceleration) * TWO * Fix::PI / Fix::from_num(60);
         let mut first_delay: Fix = (TWO * (angle_rad) / accel_rad_s2).sqrt()
-            * Fix::from_num(0.676) * Fix::from_num(TIMER_HZ_MICROS);
+            * Fix::from_num(0.676)
+            * Fix::from_num(TIMER_HZ_MICROS);
         if first_delay < target_delay {
             first_delay = target_delay;
         }
-        let target_duration_ms = TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms);
+        let target_duration_ms =
+            TimerDurationU64::<TIMER_HZ_MILLIS>::from_ticks(target_duration_ms);
         Ok(Stepgen {
             operating_mode,
             current_step: 0,
@@ -85,7 +96,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Returns 'None' if it should stop. Otherwise, returns delay as u64.
-    pub fn next_delay(&mut self, timer_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>) -> Option<u64> {
+    pub fn next_delay(
+        &mut self,
+        timer_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>,
+    ) -> Option<u64> {
         if timer_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
         }
@@ -96,7 +110,10 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     /// Duration operating mode
-    pub fn next_delay_duration(&mut self, current_ms: TimerInstantU64<TIMER_HZ_MILLIS>) -> Option<u64> {
+    pub fn next_delay_duration(
+        &mut self,
+        current_ms: TimerInstantU64<TIMER_HZ_MILLIS>,
+    ) -> Option<u64> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
             self.start_time_ms = Some(current_ms);
@@ -112,8 +129,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         }
 
         // If the time remaining is less than the time it took to accelerate, slow down.
-        let time_remaining = self.target_duration_ms - self.current_duration_ms;
-        if time_remaining <= self.acceleration_duration_ms {
+        if (self.target_duration_ms - self.current_duration_ms) <= self.acceleration_duration_ms {
             self.is_acceleration_done = false;
             self.slow_down();
             return Some(self.current_delay.round().to_num::<u64>());
@@ -176,12 +192,12 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
         self.current_step += 1;
     }
 
-
     /// Slow down function
     fn slow_down(&mut self) {
         let denom: Fix = FOUR * self.acceleration_steps - FIX_ONE;
         self.current_delay += (TWO * self.current_delay) / denom;
-        if self.acceleration_steps == FIX_ZERO { // Prevent underflow
+        if self.acceleration_steps == FIX_ZERO {
+            // Prevent underflow
             self.acceleration_steps = FIX_ONE;
         }
         self.acceleration_steps -= FIX_ONE;
