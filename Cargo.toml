@@ -21,11 +21,3 @@ fixed-macro = {git = "https://github.com/Ultrajackstr/fixed-macro.git", branch =
 fixed-sqrt = {git = "https://github.com/Ultrajackstr/fixed-sqrt-rs.git", branch = "master"}
 
 fugit = "0"
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-
-# Optimize all dependencies even in debug builds:
-[profile.dev.package."*"]
-opt-level = 2
