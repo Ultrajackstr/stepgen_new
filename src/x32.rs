@@ -1,13 +1,14 @@
 use crate::utils::enums::{Error, OperatingMode};
-use fixed::types::U20F12;
+use fixed::types::extra::{U18, U32};
+use fixed::types::{extra::U12, U20F12};
 use fixed::FixedU32;
 use fixed_macro::fixed;
 use fugit::{TimerDurationU32, TimerInstantU32};
 
-type Fix = FixedU32<12>;
-type Fix18 = FixedU32<18>;
+type Fix = FixedU32<U12>;
+type Fix18 = FixedU32<U18>;
 // Higher precision for the sqrt function.
-type Fix32 = FixedU32<32>;
+type Fix32 = FixedU32<U32>;
 
 // Higher precision for the sqrt function.
 const TWO: U20F12 = fixed!(2: U20F12);

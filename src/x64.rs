@@ -1,11 +1,11 @@
-use fixed::types::U32F32;
+use fixed::types::{extra::U32, U32F32};
 use fixed::FixedU64;
 use fixed_macro::fixed;
 use fugit::{TimerDurationU64, TimerInstantU64};
 
 use crate::utils::enums::{Error, OperatingMode};
 
-type Fix = FixedU64<32>;
+type Fix = FixedU64<U32>;
 
 const TWO: U32F32 = fixed!(2: U32F32);
 const FOUR: U32F32 = fixed!(4: U32F32);
