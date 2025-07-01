@@ -13,7 +13,7 @@ exclude = [
 edition = "2021"
 
 [dependencies]
-fixed = "1.28"
-fixed-sqrt = "0.2.5"
-fixed-macro = "1.2.0"
+fixed = "1"
+fixed-sqrt = "0"
+fixed-macro = "1"
 fugit = "0"
