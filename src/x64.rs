@@ -13,11 +13,11 @@ const FOUR: U32F32 = fixed!(4: U32F32);
 const FIX_ONE: Fix = Fix::ONE;
 const FIX_ZERO: Fix = Fix::ZERO;
 
-const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
+const TIMER_HZ_MILLIS: u64 = 1_000; // One tick is 1 millisecond.
 
 /// State of the stepgen.
 #[derive(Debug)]
-pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
+pub struct Stepgen<const TIMER_HZ_MICROS: u64> {
     // Operating mode
     operating_mode: OperatingMode,
     current_step: u64,
@@ -41,7 +41,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     is_acceleration_done: bool,
 }
 
-impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
+impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
     pub fn new(
         target_rpm: u32,
@@ -213,7 +213,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     pub fn get_acceleration_duration_ms(&self) -> u64 {
-        self.acceleration_duration_ms.ticks()
+        self.acceleration_duration_ms.as_ticks()
     }
 
     pub fn is_acceleration_done(&self) -> bool {

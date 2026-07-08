@@ -1,7 +1,7 @@
 use crate::utils::enums::{Error, OperatingMode};
-use fixed::types::extra::{U18, U32};
-use fixed::types::{extra::U12, U20F12};
 use fixed::FixedU32;
+use fixed::types::extra::{U18, U32};
+use fixed::types::{U20F12, extra::U12};
 use fixed_macro::fixed;
 use fugit::{TimerDurationU32, TimerInstantU32};
 
@@ -14,11 +14,11 @@ type Fix32 = FixedU32<U32>;
 const TWO: U20F12 = fixed!(2: U20F12);
 const FOUR: U20F12 = fixed!(4: U20F12);
 
-const TIMER_HZ_MILLIS: u32 = 1_000; // One tick is 1 millisecond.
+const TIMER_HZ_MILLIS: u64 = 1_000; // One tick is 1 millisecond.
 
 /// State of the stepgen.
 #[derive(Debug)]
-pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
+pub struct Stepgen<const TIMER_HZ_MICROS: u64> {
     // Operating mode
     operating_mode: OperatingMode,
     current_step: u32,
@@ -42,7 +42,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u32> {
     is_acceleration_done: bool,
 }
 
-impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
+impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Create new copy of stepgen.
     pub fn new(
         target_rpm: u16,
@@ -218,7 +218,7 @@ impl<const TIMER_HZ_MICROS: u32> Stepgen<TIMER_HZ_MICROS> {
     }
 
     pub fn get_acceleration_duration_ms(&self) -> u32 {
-        self.acceleration_duration_ms.ticks()
+        self.acceleration_duration_ms.as_ticks()
     }
 
     pub fn is_acceleration_done(&self) -> bool {
