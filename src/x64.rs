@@ -1,7 +1,7 @@
 use fixed::types::{extra::U32, U32F32};
 use fixed::FixedU64;
 use fixed_macro::fixed;
-use fugit::{TimerDurationU64, TimerInstantU64};
+use fugit::{TimerDurationU64, WrappingTimerInstantU64};
 
 use crate::utils::enums::{Error, OperatingMode};
 
@@ -37,7 +37,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u64> {
     // Target speed delay
     target_delay: Fix,
     // Start time
-    start_time_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>,
+    start_time_ms: Option<WrappingTimerInstantU64<TIMER_HZ_MILLIS>>,
     is_acceleration_done: bool,
 }
 
@@ -98,7 +98,7 @@ impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Returns 'None' if it should stop. Otherwise, returns delay as u64.
     pub fn next_delay(
         &mut self,
-        timer_ms: Option<TimerInstantU64<TIMER_HZ_MILLIS>>,
+        timer_ms: Option<WrappingTimerInstantU64<TIMER_HZ_MILLIS>>,
     ) -> Option<u64> {
         if timer_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
@@ -112,7 +112,7 @@ impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Duration operating mode
     pub fn next_delay_duration(
         &mut self,
-        current_ms: TimerInstantU64<TIMER_HZ_MILLIS>,
+        current_ms: WrappingTimerInstantU64<TIMER_HZ_MILLIS>,
     ) -> Option<u64> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {

@@ -3,7 +3,7 @@ use fixed::FixedU32;
 use fixed::types::extra::{U18, U32};
 use fixed::types::{U20F12, extra::U12};
 use fixed_macro::fixed;
-use fugit::{TimerDurationU32, TimerInstantU32};
+use fugit::{TimerDurationU32, WrappingTimerInstantU32};
 
 type Fix = FixedU32<U12>;
 type Fix18 = FixedU32<U18>;
@@ -38,7 +38,7 @@ pub struct Stepgen<const TIMER_HZ_MICROS: u64> {
     // Target speed delay
     target_delay: Fix,
     // Start time
-    start_time_ms: Option<TimerInstantU32<TIMER_HZ_MILLIS>>,
+    start_time_ms: Option<WrappingTimerInstantU32<TIMER_HZ_MILLIS>>,
     is_acceleration_done: bool,
 }
 
@@ -102,7 +102,7 @@ impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Returns 'None' if it should stop. Otherwise, returns delay as u32.
     pub fn next_delay(
         &mut self,
-        timer_ms: Option<TimerInstantU32<TIMER_HZ_MILLIS>>,
+        timer_ms: Option<WrappingTimerInstantU32<TIMER_HZ_MILLIS>>,
     ) -> Option<u32> {
         if timer_ms.is_none() && self.operating_mode == OperatingMode::Duration {
             return None;
@@ -116,7 +116,7 @@ impl<const TIMER_HZ_MICROS: u64> Stepgen<TIMER_HZ_MICROS> {
     /// Duration operating mode
     pub fn next_delay_duration(
         &mut self,
-        current_ms: TimerInstantU32<TIMER_HZ_MILLIS>,
+        current_ms: WrappingTimerInstantU32<TIMER_HZ_MILLIS>,
     ) -> Option<u32> {
         // If start time is None, we're at the start of the move. Set start time.
         if self.start_time_ms.is_none() {
